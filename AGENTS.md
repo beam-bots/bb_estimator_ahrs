@@ -10,14 +10,15 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Project Overview
 
-`bb_ahrs` ships three 6-DOF IMU fusion algorithms — Madgwick, Mahony, and
-Complementary — as `BB.Estimator` implementations for the [Beam Bots](https://github.com/beam-bots/bb)
-framework. Ported from Gus Workman's [`gworkman/ahrs`](https://github.com/gworkman/ahrs).
+`bb_estimator_ahrs` ships three 6-DOF IMU fusion algorithms — Madgwick,
+Mahony, and Complementary — as `BB.Estimator` implementations for the
+[Beam Bots](https://github.com/beam-bots/bb) framework. Ported from Gus
+Workman's [`gworkman/ahrs`](https://github.com/gworkman/ahrs).
 
 ## Architecture
 
 ```
-lib/bb/ahrs/
+lib/bb/estimator/ahrs/
 ├── madgwick.ex         # BB.Estimator, gradient-descent filter
 ├── mahony.ex           # BB.Estimator, PI controller filter
 ├── complementary.ex    # BB.Estimator, high-pass gyro + low-pass tilt
@@ -35,11 +36,11 @@ Each algorithm module:
 - Tracks `dt` from `message.monotonic_time` — the wall clock is never
   read.
 
-The internal `BB.Ahrs.Quaternion` is a scalar 4-float struct, deliberately
+The internal `BB.Estimator.Ahrs.Quaternion` is a scalar 4-float struct, deliberately
 kept separate from `BB.Math.Quaternion` (Nx-backed) — Nx dispatch
 overhead is prohibitive at AHRS update rates of 100–1000 Hz.
 Conversion to `BB.Math.Quaternion` happens only at the message
-boundary via `BB.Ahrs.Quaternion.to_bb/1`.
+boundary via `BB.Estimator.Ahrs.Quaternion.to_bb/1`.
 
 ## Build and Test Commands
 

@@ -3,11 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.ComplementaryTest do
+defmodule BB.Estimator.Ahrs.ComplementaryTest do
   use ExUnit.Case, async: true
 
-  alias BB.Ahrs.Complementary
-  alias BB.Ahrs.Math, as: AhrsMath
+  alias BB.Estimator.Ahrs.Complementary
+  alias BB.Estimator.Ahrs.Math, as: AhrsMath
 
   @gravity 9.80665
 

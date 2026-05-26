@@ -3,11 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.MadgwickTest do
+defmodule BB.Estimator.Ahrs.MadgwickTest do
   use ExUnit.Case, async: true
 
-  alias BB.Ahrs.Madgwick
-  alias BB.Ahrs.Math, as: AhrsMath
+  alias BB.Estimator.Ahrs.Madgwick
+  alias BB.Estimator.Ahrs.Math, as: AhrsMath
 
   @gravity 9.80665
 

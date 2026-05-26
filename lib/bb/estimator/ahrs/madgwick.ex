@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.Madgwick do
+defmodule BB.Estimator.Ahrs.Madgwick do
   @moduledoc """
   Madgwick AHRS filter, 6-DOF IMU variant, implemented as a
   `BB.Estimator`.
@@ -17,7 +17,7 @@ defmodule BB.Ahrs.Madgwick do
   ## Usage
 
       sensor :imu, BB.Sensor.SomeImu, ... do
-        estimator :orientation, {BB.Ahrs.Madgwick, beta: 0.1}
+        estimator :orientation, {BB.Estimator.Ahrs.Madgwick, beta: 0.1}
       end
 
   ## Options
@@ -43,8 +43,8 @@ defmodule BB.Ahrs.Madgwick do
       ]
     ]
 
-  alias BB.Ahrs.Math, as: AhrsMath
-  alias BB.Ahrs.Quaternion, as: Q
+  alias BB.Estimator.Ahrs.Math, as: AhrsMath
+  alias BB.Estimator.Ahrs.Quaternion, as: Q
   alias BB.Math.Quaternion, as: NxQuaternion
   alias BB.Math.Vec3
   alias BB.Message

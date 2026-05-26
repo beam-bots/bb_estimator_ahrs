@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.QuaternionTest do
+defmodule BB.Estimator.Ahrs.QuaternionTest do
   use ExUnit.Case, async: true
-  alias BB.Ahrs.Quaternion
+  alias BB.Estimator.Ahrs.Quaternion
 
   defp magnitude(%Quaternion{w: w, x: x, y: y, z: z}) do
     :math.sqrt(w * w + x * x + y * y + z * z)

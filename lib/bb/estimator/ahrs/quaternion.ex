@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.Quaternion do
+defmodule BB.Estimator.Ahrs.Quaternion do
   @moduledoc """
   Scalar (w, x, y, z) quaternion used internally by the AHRS algorithms.
 

@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.MahonyTest do
+defmodule BB.Estimator.Ahrs.MahonyTest do
   use ExUnit.Case, async: true
 
-  alias BB.Ahrs.Mahony
+  alias BB.Estimator.Ahrs.Mahony
 
   @gravity 9.80665
 

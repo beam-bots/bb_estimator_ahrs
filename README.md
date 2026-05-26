@@ -5,24 +5,24 @@ SPDX-FileCopyrightText: 2026 James Harton
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# bb_ahrs
+# bb_estimator_ahrs
 
-![Build Status](https://github.com/beam-bots/bb_ahrs/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://github.com/beam-bots/bb_estimator_ahrs/actions/workflows/ci.yml/badge.svg)
 [![License: Apache-2.0 / MIT](https://img.shields.io/badge/License-Apache--2.0%20%2F%20MIT-green.svg)](#origins)
 
-AHRS (Attitude and Heading Reference System) filters for the
+AHRS (Attitude and Heading Reference System) estimators for the
 [Beam Bots](https://github.com/beam-bots/bb) framework.
 
-This is version `0.1.0` of `bb_ahrs`.
+This is version `0.1.0` of `bb_estimator_ahrs`.
 
 Three 6-DOF IMU fusion algorithms, each implemented as a `BB.Estimator`:
 
-- **`BB.Ahrs.Madgwick`** — gradient-descent filter. Standard parameter
-  is `:beta` (default `0.1`).
-- **`BB.Ahrs.Mahony`** — PI-controller filter with optional gyro bias
-  estimation. Parameters `:kp` / `:ki`.
-- **`BB.Ahrs.Complementary`** — high-pass gyro + low-pass tilt blend.
-  Parameter `:alpha` or `:time_constant`.
+- **`BB.Estimator.Ahrs.Madgwick`** — gradient-descent filter. Standard
+  parameter is `:beta` (default `0.1`).
+- **`BB.Estimator.Ahrs.Mahony`** — PI-controller filter with optional
+  gyro bias estimation. Parameters `:kp` / `:ki`.
+- **`BB.Estimator.Ahrs.Complementary`** — high-pass gyro + low-pass
+  tilt blend. Parameter `:alpha` or `:time_constant`.
 
 All three consume `BB.Message.Sensor.Imu` payloads and republish them
 with `:orientation` replaced by the fused estimate. Inputs and outputs
@@ -40,7 +40,7 @@ defmodule MyRobot do
   topology do
     link :base_link do
       sensor :imu, BB.Sensor.SomeImu, bus: "i2c-1", address: 0x68 do
-        estimator :orientation, {BB.Ahrs.Madgwick, beta: 0.1}
+        estimator :orientation, {BB.Estimator.Ahrs.Madgwick, beta: 0.1}
       end
     end
   end
@@ -54,9 +54,9 @@ receive the raw sensor output.
 Swap algorithms with a one-line change:
 
 ```elixir
-estimator :orientation, {BB.Ahrs.Mahony, kp: 2.0, ki: 0.005}
+estimator :orientation, {BB.Estimator.Ahrs.Mahony, kp: 2.0, ki: 0.005}
 # or
-estimator :orientation, {BB.Ahrs.Complementary, alpha: 0.98}
+estimator :orientation, {BB.Estimator.Ahrs.Complementary, alpha: 0.98}
 ```
 
 ## Linear-acceleration rejection
@@ -93,13 +93,9 @@ BB_VERSION=local mix test
 
 ### Note on `bb` version
 
-`bb_ahrs` depends on the `BB.Estimator` behaviour added in [proposal
-0018, phase 1](https://github.com/beam-bots/bb/pull/115). Until that
-PR merges and `bb 0.20` is released to hex.pm, the default `bb`
-dependency tracks the `main` branch of [beam-bots/bb](https://github.com/beam-bots/bb).
-CI will go green automatically once Phase 1 is merged. For local
-development, use `BB_VERSION=local` to point at a sibling checkout that
-has the behaviour available.
+`bb_estimator_ahrs` depends on the `BB.Estimator` behaviour from
+[proposal 0018](https://github.com/beam-bots/proposals/blob/main/accepted/0018-bb-estimator.md).
+Until `bb 0.20` is released to hex.pm, the default `bb` dependency
+tracks the `main` branch of [beam-bots/bb](https://github.com/beam-bots/bb).
 
-See the [proposal](https://github.com/beam-bots/proposals/blob/main/accepted/0018-bb-estimator.md)
-for design background.
+See the proposal for design background.

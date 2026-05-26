@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.Math do
+defmodule BB.Estimator.Ahrs.Math do
   @moduledoc """
   Stateless mathematical utilities shared across the AHRS filters.
 
@@ -16,7 +16,7 @@ defmodule BB.Ahrs.Math do
   `Ahrs.Math`.
   """
 
-  alias BB.Ahrs.Quaternion, as: Q
+  alias BB.Estimator.Ahrs.Quaternion, as: Q
 
   @gravity 9.80665
   @gimbal_lock_threshold 0.99999

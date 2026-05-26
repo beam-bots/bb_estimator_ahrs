@@ -3,11 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-defmodule BB.Ahrs.MathTest do
+defmodule BB.Estimator.Ahrs.MathTest do
   use ExUnit.Case, async: true
 
-  alias BB.Ahrs.Math
-  alias BB.Ahrs.Quaternion, as: Q
+  alias BB.Estimator.Ahrs.Math
+  alias BB.Estimator.Ahrs.Quaternion, as: Q
 
   @tolerance 1.0e-9
 

@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule BB.Ahrs.MixProject do
+defmodule BB.Estimator.Ahrs.MixProject do
   use Mix.Project
 
   @moduledoc """
-  AHRS (Madgwick / Mahony / Complementary) algorithms for the Beam Bots framework.
+  AHRS (Madgwick / Mahony / Complementary) estimators for the Beam Bots framework.
   """
 
   @version "0.1.0"
@@ -14,7 +14,7 @@ defmodule BB.Ahrs.MixProject do
   def project do
     [
       aliases: aliases(),
-      app: :bb_ahrs,
+      app: :bb_estimator_ahrs,
       consolidate_protocols: Mix.env() == :prod,
       deps: deps(),
       description: @moduledoc,
@@ -35,7 +35,7 @@ defmodule BB.Ahrs.MixProject do
       maintainers: ["James Harton <james@harton.nz>", "Gus Workman"],
       licenses: ["Apache-2.0", "MIT"],
       links: %{
-        "Source" => "https://github.com/beam-bots/bb_ahrs",
+        "Source" => "https://github.com/beam-bots/bb_estimator_ahrs",
         "Upstream" => "https://github.com/gworkman/ahrs",
         "Sponsor" => "https://github.com/sponsors/jimsynz"
       }
@@ -53,7 +53,7 @@ defmodule BB.Ahrs.MixProject do
       main: "readme",
       extras: ["README.md"],
       source_ref: "main",
-      source_url: "https://github.com/beam-bots/bb_ahrs"
+      source_url: "https://github.com/beam-bots/bb_estimator_ahrs"
     ]
   end
 
@@ -61,9 +61,9 @@ defmodule BB.Ahrs.MixProject do
 
   defp deps do
     [
-      # Tracks bb's main branch until Phase 1 of proposal 0018 is released to
-      # hex.pm as bb 0.20, at which point this becomes `bb_dep("~> 0.20")`.
-      {:bb, bb_dep([git: "https://github.com/beam-bots/bb.git", branch: "main"])},
+      # Tracks bb's main branch until bb 0.20 is released to hex.pm,
+      # at which point this becomes `bb_dep("~> 0.20")`.
+      {:bb, bb_dep(git: "https://github.com/beam-bots/bb.git", branch: "main")},
 
       # dev/test
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

@@ -1,103 +1,90 @@
 <!--
 SPDX-FileCopyrightText: 2026 Gus Workman
+SPDX-FileCopyrightText: 2026 James Harton
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: Apache-2.0
 -->
 
-# Ahrs
+# bb_ahrs
 
-Ahrs is a modular Elixir library for Attitude and Heading Reference System
-(AHRS) algorithms. It provides a robust, algorithm-agnostic interface for
-processing data from Inertial Measurement Units (IMUs) to determine 3D
-orientation.
+AHRS (Attitude and Heading Reference System) filters for the
+[Beam Bots](https://github.com/beam-bots/bb) framework.
 
-The library features strongly-typed sensor containers, automatic time-delta
-tracking, and industry-standard robustness features like linear acceleration
-rejection and integral anti-windup.
+Three 6-DOF IMU fusion algorithms, each implemented as a `BB.Estimator`:
 
-## Available Algorithms
+- **`BB.Ahrs.Madgwick`** — gradient-descent filter. Standard parameter
+  is `:beta` (default `0.1`).
+- **`BB.Ahrs.Mahony`** — PI-controller filter with optional gyro bias
+  estimation. Parameters `:kp` / `:ki`.
+- **`BB.Ahrs.Complementary`** — high-pass gyro + low-pass tilt blend.
+  Parameter `:alpha` or `:time_constant`.
 
-The library currently provides three primary filters:
-
-- **Madgwick:** A highly efficient gradient descent algorithm that is
-  computationally inexpensive and well-suited for high-speed updates.
-- **Mahony:** A robust Proportional-Integral (PI) controller filter. It tracks
-  integral error and is often preferred for its stability on low-power hardware.
-- **Complementary Filter:** A lightweight filter that combines high-pass
-  integrated gyroscope data with a low-pass accelerometer tilt calculation. It
-  is simple to tune and very computationally cheap.
+All three consume `BB.Message.Sensor.Imu` payloads and republish them
+with `:orientation` replaced by the fused estimate. Inputs and outputs
+are in SI units (rad/s, m/s², radians) — unit conversion is the
+publishing sensor's responsibility.
 
 ## Usage
 
-To use the library, you initialize an AHRS instance using the top-level `Ahrs`
-module. This provides a unified API regardless of the underlying algorithm you
-choose.
+Nest an estimator inside any sensor that publishes `BB.Message.Sensor.Imu`:
 
 ```elixir
-alias Ahrs.Accelerometer.Sample, as: Accel
-alias Ahrs.Gyroscope.Sample, as: Gyro
+defmodule MyRobot do
+  use BB
 
-# Initialize the filter (Ahrs.new_madgwick(), Ahrs.new_mahony(), or Ahrs.new_complementary())
-ahrs = Ahrs.new_madgwick()
-
-# Create sensor samples from your hardware readings
-measurements = %{
-  accel: %Accel{x: 0.0, y: 0.0, z: 1.0, units: :g},
-  gyro: %Gyro{x: 0.01, y: 0.0, z: 0.0, units: :rad_s}
-}
-
-# Update the filter state.
-# The library automatically calculates the time delta (dt) between calls.
-ahrs = Ahrs.update(ahrs, measurements)
-
-# Convert the internal state into human-readable Euler angles (supports :radians and :degrees)
-{roll, pitch, yaw} = Ahrs.euler_angles(ahrs, units: :degrees)
-```
-
-## Features
-
-### Unified API and Algorithm Agnostic
-
-The top-level `Ahrs` module allows you to swap between Madgwick, Mahony, and
-Complementary filters by changing a single initialization line. The rest of your
-integration code remains identical.
-
-### Automatic Timing
-
-One of the challenges in AHRS systems is accurately measuring the time elapsed
-between sensor updates. This library simplifies this by automatically querying
-the system monotonic clock during the `Ahrs.update/3` call. You can override
-this by passing an explicit `:dt` option in seconds.
-
-### Robust Sensor Rejection
-
-All filters support an `:accel_threshold` (default `0.1` G). This represents the
-maximum allowable deviation from earth gravity. Any reading outside the
-$[0.9G, 1.1G]$ range is ignored, preventing orientation jumps during high linear
-acceleration or vibration.
-
-## Examples & Simulation
-
-The project includes a 3D visual simulator to help you verify and tune your
-filter configurations. It uses Phoenix LiveView and Three.js to render a
-real-time visualization of the filter output.
-
-See the [Examples README](examples/README.md) for more details.
-
-### Roadmap
-
-- [ ] Add 9-DOF MARG support (Magnetometer integration)
-- [ ] Write a Nerves integration example for live hardware
-
-## Installation
-
-The package can be installed by adding `ahrs` to your list of dependencies in
-`mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:ahrs, "~> 0.1.0"}
-  ]
+  topology do
+    link :base_link do
+      sensor :imu, BB.Sensor.SomeImu, bus: "i2c-1", address: 0x68 do
+        estimator :orientation, {BB.Ahrs.Madgwick, beta: 0.1}
+      end
+    end
+  end
 end
 ```
+
+Subscribers to `[:sensor, :base_link, :imu, :orientation]` receive the
+fused IMU message; subscribers to `[:sensor, :base_link, :imu]` still
+receive the raw sensor output.
+
+Swap algorithms with a one-line change:
+
+```elixir
+estimator :orientation, {BB.Ahrs.Mahony, kp: 2.0, ki: 0.005}
+# or
+estimator :orientation, {BB.Ahrs.Complementary, alpha: 0.98}
+```
+
+## Linear-acceleration rejection
+
+All three algorithms accept an `:accel_threshold` option (default `0.1`,
+expressed as a fractional deviation from 1 g). When the accelerometer
+magnitude departs from gravity by more than the threshold, the
+correction term is suppressed and the filter falls back to gyro-only
+integration for that step. Standard mitigation for periods of sustained
+linear acceleration.
+
+## Origins
+
+Ported from Gus Workman's [`gworkman/ahrs`](https://github.com/gworkman/ahrs).
+The algorithm internals are essentially Gus's code with unit conversion
+and `dt` tracking lifted out into the framework boundary. Gus's original
+work is MIT; the new `BB.Estimator` wrappers and project scaffolding
+are Apache-2.0. See per-file SPDX headers for details.
+
+## Development
+
+```bash
+mix deps.get
+mix test
+mix check --no-retry
+```
+
+Pointing at a local `bb` checkout for cross-repo development:
+
+```bash
+BB_VERSION=local mix deps.get
+BB_VERSION=local mix test
+```
+
+See the [proposal](https://github.com/beam-bots/proposals/blob/main/accepted/0018-bb-estimator.md)
+for design background.

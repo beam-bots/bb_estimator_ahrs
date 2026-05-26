@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Gus Workman
+# SPDX-FileCopyrightText: 2026 James Harton
 #
 # SPDX-License-Identifier: MIT
 
-defmodule Ahrs.QuaternionTest do
+defmodule BB.Ahrs.QuaternionTest do
   use ExUnit.Case, async: true
-  alias Ahrs.Quaternion
+  alias BB.Ahrs.Quaternion
 
   defp magnitude(%Quaternion{w: w, x: x, y: y, z: z}) do
     :math.sqrt(w * w + x * x + y * y + z * z)
@@ -17,35 +18,35 @@ defmodule Ahrs.QuaternionTest do
     assert_in_delta q1.z, q2.z, delta
   end
 
-  describe "normalize/1" do
-    test "normalizes a non-unit quaternion" do
+  describe "normalise/1" do
+    test "normalises a non-unit quaternion" do
       q = %Quaternion{w: 2.0, x: 2.0, y: 2.0, z: 2.0}
-      normalized = Quaternion.normalize(q)
+      normalised = Quaternion.normalise(q)
 
-      assert_in_delta magnitude(normalized), 1.0, 1.0e-15
-      assert normalized.w == 0.5
+      assert_in_delta magnitude(normalised), 1.0, 1.0e-15
+      assert normalised.w == 0.5
     end
 
     test "handles negative values" do
       q = %Quaternion{w: -1.0, x: -2.0, y: -3.0, z: -4.0}
-      normalized = Quaternion.normalize(q)
+      normalised = Quaternion.normalise(q)
 
-      assert_in_delta magnitude(normalized), 1.0, 1.0e-15
-      assert normalized.w < 0
-      assert normalized.x < 0
+      assert_in_delta magnitude(normalised), 1.0, 1.0e-15
+      assert normalised.w < 0
+      assert normalised.x < 0
     end
 
-    test "normalizes single-axis values" do
+    test "normalises single-axis values" do
       q = %Quaternion{w: 0.0, x: 5.0, y: 0.0, z: 0.0}
-      normalized = Quaternion.normalize(q)
+      normalised = Quaternion.normalise(q)
 
-      assert_in_delta magnitude(normalized), 1.0, 1.0e-15
-      assert normalized == %Quaternion{w: 0.0, x: 1.0, y: 0.0, z: 0.0}
+      assert_in_delta magnitude(normalised), 1.0, 1.0e-15
+      assert normalised == %Quaternion{w: 0.0, x: 1.0, y: 0.0, z: 0.0}
     end
 
-    test "handles zero magnitude (returns original)" do
+    test "returns the original on zero magnitude" do
       q = %Quaternion{w: 0.0, x: 0.0, y: 0.0, z: 0.0}
-      assert Quaternion.normalize(q) == q
+      assert Quaternion.normalise(q) == q
     end
   end
 
@@ -70,7 +71,6 @@ defmodule Ahrs.QuaternionTest do
     test "identity multiplication" do
       identity = %Quaternion{w: 1.0, x: 0.0, y: 0.0, z: 0.0}
       half_sqrt_2 = 1.0 / :math.sqrt(2.0)
-      # 90 deg rotation around X
       q = %Quaternion{w: half_sqrt_2, x: half_sqrt_2, y: 0.0, z: 0.0}
 
       assert Quaternion.multiply(q, identity) == q
@@ -78,16 +78,13 @@ defmodule Ahrs.QuaternionTest do
     end
 
     test "multiplication of two rotations" do
-      # Example: 90 deg rotation around X * 90 deg rotation around Y
-      # cos(45) = sin(45) = 1/sqrt(2)
       s = 1.0 / :math.sqrt(2.0)
       q1 = %Quaternion{w: s, x: s, y: 0.0, z: 0.0}
       q2 = %Quaternion{w: s, x: 0.0, y: s, z: 0.0}
 
       res = Quaternion.multiply(q1, q2)
-
-      # Expected: w=0.5, x=0.5, y=0.5, z=0.5
       expected = %Quaternion{w: 0.5, x: 0.5, y: 0.5, z: 0.5}
+
       assert_quaternion_in_delta(res, expected)
     end
 
@@ -99,19 +96,28 @@ defmodule Ahrs.QuaternionTest do
       res1 = Quaternion.multiply(q1, q2)
       res2 = Quaternion.multiply(q2, q1)
 
-      assert res1 != res2
-      # For (90X * 90Y) vs (90Y * 90X), the Z component flips sign
+      refute res1 == res2
       assert_in_delta res1.z, 0.5, 1.0e-15
       assert_in_delta res2.z, -0.5, 1.0e-15
     end
 
-    test "multiplying by conjugate yields identity (for unit quaternions)" do
+    test "multiplying by conjugate yields identity" do
       q = %Quaternion{w: 0.5, x: 0.5, y: 0.5, z: 0.5}
       conjugate = Quaternion.conjugate(q)
       identity = %Quaternion{w: 1.0, x: 0.0, y: 0.0, z: 0.0}
 
       res = Quaternion.multiply(q, conjugate)
       assert_quaternion_in_delta(res, identity)
+    end
+  end
+
+  describe "to_bb/1 and from_bb/1" do
+    test "round-trips through BB.Math.Quaternion" do
+      q = %Quaternion{w: 0.5, x: 0.5, y: 0.5, z: 0.5}
+      bb = Quaternion.to_bb(q)
+      back = Quaternion.from_bb(bb)
+
+      assert_quaternion_in_delta(back, q, 1.0e-12)
     end
   end
 end

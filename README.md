@@ -7,8 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 
 # bb_ahrs
 
+![Build Status](https://github.com/beam-bots/bb_ahrs/actions/workflows/ci.yml/badge.svg)
+[![License: Apache-2.0 / MIT](https://img.shields.io/badge/License-Apache--2.0%20%2F%20MIT-green.svg)](#origins)
+
 AHRS (Attitude and Heading Reference System) filters for the
 [Beam Bots](https://github.com/beam-bots/bb) framework.
+
+This is version `0.1.0` of `bb_ahrs`.
 
 Three 6-DOF IMU fusion algorithms, each implemented as a `BB.Estimator`:
 

@@ -1,0 +1,12 @@
+<!--
+SPDX-FileCopyrightText: 2026 James Harton
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+<!-- changelog -->

@@ -28,7 +28,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
     ]
   end
 
-  defp dialyzer, do: []
+  defp dialyzer, do: [plt_add_apps: [:mix]]
 
   defp package do
     [
@@ -70,6 +70,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
       {:ex_check, "~> 0.16", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.9", only: [:dev, :test], runtime: false},
+      {:igniter, "~> 0.6", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end

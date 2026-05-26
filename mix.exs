@@ -61,7 +61,9 @@ defmodule BB.Ahrs.MixProject do
 
   defp deps do
     [
-      {:bb, bb_dep("~> 0.20")},
+      # Tracks bb's main branch until Phase 1 of proposal 0018 is released to
+      # hex.pm as bb 0.20, at which point this becomes `bb_dep("~> 0.20")`.
+      {:bb, bb_dep([git: "https://github.com/beam-bots/bb.git", branch: "main"])},
 
       # dev/test
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

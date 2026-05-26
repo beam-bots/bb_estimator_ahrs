@@ -61,9 +61,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
 
   defp deps do
     [
-      # Tracks bb's main branch until bb 0.20 is released to hex.pm,
-      # at which point this becomes `bb_dep("~> 0.20")`.
-      {:bb, bb_dep(git: "https://github.com/beam-bots/bb.git", branch: "main")},
+      {:bb, bb_dep("~> 0.20")},
 
       # dev/test
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

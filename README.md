@@ -91,11 +91,6 @@ BB_VERSION=local mix deps.get
 BB_VERSION=local mix test
 ```
 
-### Note on `bb` version
-
-`bb_estimator_ahrs` depends on the `BB.Estimator` behaviour from
-[proposal 0018](https://github.com/beam-bots/proposals/blob/main/accepted/0018-bb-estimator.md).
-Until `bb 0.20` is released to hex.pm, the default `bb` dependency
-tracks the `main` branch of [beam-bots/bb](https://github.com/beam-bots/bb).
-
-See the proposal for design background.
+`bb_estimator_ahrs` builds on the `BB.Estimator` behaviour introduced
+in [proposal 0018](https://github.com/beam-bots/proposals/blob/main/accepted/0018-bb-estimator.md)
+and shipped in `bb 0.20`. See the proposal for design background.

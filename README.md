@@ -7,8 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 
 # bb_estimator_ahrs
 
-![Build Status](https://github.com/beam-bots/bb_estimator_ahrs/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/beam-bots/bb_estimator_ahrs/actions/workflows/ci.yml/badge.svg)](https://github.com/beam-bots/bb_estimator_ahrs/actions/workflows/ci.yml)
 [![License: Apache-2.0 / MIT](https://img.shields.io/badge/License-Apache--2.0%20%2F%20MIT-green.svg)](#origins)
+[![Hex version badge](https://img.shields.io/hexpm/v/bb_estimator_ahrs.svg)](https://hex.pm/packages/bb_estimator_ahrs)
+[![Hexdocs badge](https://img.shields.io/badge/docs-hexdocs-purple)](https://hexdocs.pm/bb_estimator_ahrs)
+[![REUSE status](https://api.reuse.software/badge/github.com/beam-bots/bb_estimator_ahrs)](https://api.reuse.software/info/github.com/beam-bots/bb_estimator_ahrs)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/beam-bots/bb_estimator_ahrs)
 
 AHRS (Attitude and Heading Reference System) estimators for the
 [Beam Bots](https://github.com/beam-bots/bb) framework.

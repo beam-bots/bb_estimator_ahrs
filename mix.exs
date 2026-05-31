@@ -51,6 +51,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
   defp docs do
     [
       main: "readme",
+      logo: "assets/logo.png",
       extras: ["README.md"],
       source_ref: "main",
       source_url: "https://github.com/beam-bots/bb_estimator_ahrs"

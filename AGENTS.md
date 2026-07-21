@@ -98,6 +98,13 @@ Mixed licence: Gus Workman's original code is MIT, the
 `BB.Estimator` wrappers and project scaffolding are Apache-2.0. See
 per-file SPDX headers and the `LICENSES/` directory. REUSE-compliant.
 
+When you create a file, its `SPDX-FileCopyrightText` line must credit **the user
+you are working for** — take their name from `git config user.name`, use the
+current year — not you the agent, and not the repo's original author. Match the
+neighbouring files' `SPDX-License-Identifier` (Apache-2.0 for wrappers and
+scaffolding, MIT only within the ported algorithm code). Never copy an existing
+file's copyright line onto a new file.
+
 ## When Making Changes
 
 1. Keep the algorithm internals scalar-float. Don't drop into Nx for

@@ -32,6 +32,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
 
   defp package do
     [
+      files: ~w(lib .formatter.exs mix.exs README* CHANGELOG* LICENSE* usage-rules.md),
       maintainers: ["James Harton <james@harton.nz>", "Gus Workman"],
       licenses: ["Apache-2.0", "MIT"],
       links: %{
@@ -72,7 +73,8 @@ defmodule BB.Estimator.Ahrs.MixProject do
       {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.9", only: [:dev, :test], runtime: false},
       {:igniter, "~> 0.6", only: [:dev, :test], runtime: false},
-      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:usage_rules, "~> 1.2", only: [:dev], runtime: false}
     ]
   end
 

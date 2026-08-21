@@ -86,6 +86,18 @@ defmodule BB.Estimator.Ahrs.Mahony do
   end
 
   @impl BB.Estimator
+  def handle_options(opts, %__MODULE__{} = state) do
+    {:ok,
+     %{
+       state
+       | kp: Keyword.fetch!(opts, :kp),
+         ki: Keyword.fetch!(opts, :ki),
+         accel_threshold: Keyword.fetch!(opts, :accel_threshold),
+         e_int_limit: Keyword.fetch!(opts, :e_int_limit)
+     }}
+  end
+
+  @impl BB.Estimator
   def handle_input(%Message{payload: %Imu{} = imu} = message, %__MODULE__{} = state) do
     state = ingest(state, imu, message.monotonic_time)
 

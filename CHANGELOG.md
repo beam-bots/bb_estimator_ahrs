@@ -10,6 +10,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.1](https://github.com/beam-bots/bb_estimator_ahrs/compare/v0.2.0...v0.2.1) (2026-08-25)
+
+
+
+
+### Bug Fixes:
+
+* react to parameter changes at runtime (#58) by James Harton
+
 ## [v0.2.0](https://github.com/beam-bots/bb_estimator_ahrs/compare/v0.1.0...v0.2.0) (2026-05-28)
 
 

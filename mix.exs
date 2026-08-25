@@ -9,7 +9,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
   AHRS (Madgwick / Mahony / Complementary) estimators for the Beam Bots framework.
   """
 
-  @version "0.2.0"
+  @version "0.2.1"
 
   def project do
     [

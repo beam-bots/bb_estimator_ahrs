@@ -73,6 +73,16 @@ defmodule BB.Estimator.Ahrs.Madgwick do
   end
 
   @impl BB.Estimator
+  def handle_options(opts, %__MODULE__{} = state) do
+    {:ok,
+     %{
+       state
+       | beta: Keyword.fetch!(opts, :beta),
+         accel_threshold: Keyword.fetch!(opts, :accel_threshold)
+     }}
+  end
+
+  @impl BB.Estimator
   def handle_input(%Message{payload: %Imu{} = imu} = message, %__MODULE__{} = state) do
     state = ingest(state, imu, message.monotonic_time)
     out = build_output_message(message, imu, state)

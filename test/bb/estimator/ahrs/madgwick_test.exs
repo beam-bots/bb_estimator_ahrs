@@ -117,4 +117,28 @@ defmodule BB.Estimator.Ahrs.MadgwickTest do
       assert {:noreply, ^state} = Madgwick.handle_input(:something_else, state)
     end
   end
+
+  describe "handle_options/2" do
+    # The behaviour's default implementation returns the state untouched, so
+    # without this a gain bound to a robot parameter accepts new values, reports
+    # them back when read, and goes on filtering with the old ones. That is
+    # worse than not being tunable: it sends whoever is tuning it looking
+    # somewhere else entirely.
+    test "adopts every option it was given" do
+      {:ok, state} = Madgwick.init(beta: 0.1, accel_threshold: 0.1)
+      {:ok, updated} = Madgwick.handle_options([beta: 0.02, accel_threshold: 0.25], state)
+
+      assert updated.beta == 0.02
+      assert updated.accel_threshold == 0.25
+    end
+
+    test "leaves the filter's own state alone" do
+      {:ok, state} = Madgwick.init(beta: 0.1, accel_threshold: 0.1)
+      stepped = %{state | last_monotonic_time: 12_345}
+      {:ok, updated} = Madgwick.handle_options([beta: 0.02, accel_threshold: 0.25], stepped)
+
+      assert updated.q == stepped.q
+      assert updated.last_monotonic_time == 12_345
+    end
+  end
 end

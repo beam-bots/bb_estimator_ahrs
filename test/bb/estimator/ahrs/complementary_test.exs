@@ -88,4 +88,39 @@ defmodule BB.Estimator.Ahrs.ComplementaryTest do
                Complementary.handle_input(msg, state)
     end
   end
+
+  describe "handle_options/2" do
+    # The behaviour's default implementation returns the state untouched, so
+    # without this a gain bound to a robot parameter accepts new values, reports
+    # them back when read, and goes on filtering with the old ones. That is
+    # worse than not being tunable: it sends whoever is tuning it looking
+    # somewhere else entirely.
+    test "adopts every option it was given" do
+      {:ok, state} = Complementary.init(alpha: 0.98, time_constant: nil, accel_threshold: 0.1)
+
+      {:ok, updated} =
+        Complementary.handle_options(
+          [alpha: 0.9, time_constant: 0.5, accel_threshold: 0.3],
+          state
+        )
+
+      assert updated.alpha == 0.9
+      assert updated.time_constant == 0.5
+      assert updated.accel_threshold == 0.3
+    end
+
+    test "leaves the filter's own state alone" do
+      {:ok, state} = Complementary.init(alpha: 0.98, time_constant: nil, accel_threshold: 0.1)
+      stepped = %{state | last_monotonic_time: 12_345}
+
+      {:ok, updated} =
+        Complementary.handle_options(
+          [alpha: 0.9, time_constant: 0.5, accel_threshold: 0.3],
+          stepped
+        )
+
+      assert updated.q == stepped.q
+      assert updated.last_monotonic_time == 12_345
+    end
+  end
 end

@@ -83,6 +83,17 @@ defmodule BB.Estimator.Ahrs.Complementary do
   end
 
   @impl BB.Estimator
+  def handle_options(opts, %__MODULE__{} = state) do
+    {:ok,
+     %{
+       state
+       | alpha: Keyword.fetch!(opts, :alpha),
+         time_constant: Keyword.fetch!(opts, :time_constant),
+         accel_threshold: Keyword.fetch!(opts, :accel_threshold)
+     }}
+  end
+
+  @impl BB.Estimator
   def handle_input(%Message{payload: %Imu{} = imu} = message, %__MODULE__{} = state) do
     state = ingest(state, imu, message.monotonic_time)
 

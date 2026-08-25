@@ -82,4 +82,40 @@ defmodule BB.Estimator.Ahrs.MahonyTest do
       assert {:reply, [out: %Message{payload: %Imu{}}], _} = Mahony.handle_input(msg, state)
     end
   end
+
+  describe "handle_options/2" do
+    # The behaviour's default implementation returns the state untouched, so
+    # without this a gain bound to a robot parameter accepts new values, reports
+    # them back when read, and goes on filtering with the old ones. That is
+    # worse than not being tunable: it sends whoever is tuning it looking
+    # somewhere else entirely.
+    test "adopts every option it was given" do
+      {:ok, state} = Mahony.init(kp: 2.0, ki: 0.0, accel_threshold: 0.1, e_int_limit: 100.0)
+
+      {:ok, updated} =
+        Mahony.handle_options(
+          [kp: 0.4, ki: 0.005, accel_threshold: 0.2, e_int_limit: 50.0],
+          state
+        )
+
+      assert updated.kp == 0.4
+      assert updated.ki == 0.005
+      assert updated.accel_threshold == 0.2
+      assert updated.e_int_limit == 50.0
+    end
+
+    test "leaves the filter's own state alone" do
+      {:ok, state} = Mahony.init(kp: 2.0, ki: 0.0, accel_threshold: 0.1, e_int_limit: 100.0)
+      stepped = %{state | last_monotonic_time: 12_345}
+
+      {:ok, updated} =
+        Mahony.handle_options(
+          [kp: 0.4, ki: 0.005, accel_threshold: 0.2, e_int_limit: 50.0],
+          stepped
+        )
+
+      assert updated.q == stepped.q
+      assert updated.last_monotonic_time == 12_345
+    end
+  end
 end

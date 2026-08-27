@@ -44,13 +44,12 @@ defmodule BB.Estimator.Ahrs.Madgwick do
     ]
 
   alias BB.Estimator.Ahrs.Math, as: AhrsMath
-  alias BB.Estimator.Ahrs.Quaternion, as: Q
-  alias BB.Math.Quaternion, as: NxQuaternion
+  alias BB.Math.Quaternion, as: Q
   alias BB.Math.Vec3
   alias BB.Message
   alias BB.Message.Sensor.Imu
 
-  defstruct q: %Q{}, last_monotonic_time: nil, beta: 0.1, accel_threshold: 0.1
+  defstruct q: Q.identity(), last_monotonic_time: nil, beta: 0.1, accel_threshold: 0.1
 
   @type t :: %__MODULE__{
           q: Q.t(),
@@ -108,18 +107,18 @@ defmodule BB.Estimator.Ahrs.Madgwick do
   def step(%__MODULE__{q: q_in} = state, {gx, gy, gz}, {ax, ay, az}, dt) do
     q = Q.normalise(q_in)
 
-    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = Q.gyro_derivative(q, gx, gy, gz)
+    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = AhrsMath.gyro_derivative(q, gx, gy, gz)
 
     {q_dot_w, q_dot_x, q_dot_y, q_dot_z} =
       apply_correction(q, {q_dot_w, q_dot_x, q_dot_y, q_dot_z}, {ax, ay, az}, state)
 
     new_q =
-      Q.normalise(%Q{
-        w: q.w + q_dot_w * dt,
-        x: q.x + q_dot_x * dt,
-        y: q.y + q_dot_y * dt,
-        z: q.z + q_dot_z * dt
-      })
+      Q.new(
+        q.w + q_dot_w * dt,
+        q.x + q_dot_x * dt,
+        q.y + q_dot_y * dt,
+        q.z + q_dot_z * dt
+      )
 
     %{state | q: new_q}
   end
@@ -210,7 +209,7 @@ defmodule BB.Estimator.Ahrs.Madgwick do
   defp build_output_message(in_msg, in_imu, %__MODULE__{q: q}) do
     {:ok, msg} =
       Imu.new(in_msg.frame_id,
-        orientation: Q.to_bb(q),
+        orientation: q,
         angular_velocity: in_imu.angular_velocity,
         linear_acceleration: in_imu.linear_acceleration
       )
@@ -222,6 +221,6 @@ defmodule BB.Estimator.Ahrs.Madgwick do
   Convenience: returns the current orientation as a `BB.Math.Quaternion`.
   Useful for direct callers.
   """
-  @spec orientation(t()) :: NxQuaternion.t()
-  def orientation(%__MODULE__{q: q}), do: Q.to_bb(q)
+  @spec orientation(t()) :: Q.t()
+  def orientation(%__MODULE__{q: q}), do: q
 end

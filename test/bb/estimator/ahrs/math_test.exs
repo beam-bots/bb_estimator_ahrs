@@ -7,9 +7,45 @@ defmodule BB.Estimator.Ahrs.MathTest do
   use ExUnit.Case, async: true
 
   alias BB.Estimator.Ahrs.Math
-  alias BB.Estimator.Ahrs.Quaternion, as: Q
+  alias BB.Math.Quaternion, as: Q
 
   @tolerance 1.0e-9
+
+  describe "gyro_derivative/4" do
+    test "is zero when the body is not rotating" do
+      assert Math.gyro_derivative(Q.identity(), 0.0, 0.0, 0.0) == {0.0, 0.0, 0.0, 0.0}
+    end
+
+    test "matches the half-omega product for rotation about each axis" do
+      # From identity, q̇ = ½ * ω, one component per axis.
+      for {omega, expected} <- [
+            {{2.0, 0.0, 0.0}, {0.0, 1.0, 0.0, 0.0}},
+            {{0.0, 2.0, 0.0}, {0.0, 0.0, 1.0, 0.0}},
+            {{0.0, 0.0, 2.0}, {0.0, 0.0, 0.0, 1.0}}
+          ] do
+        {gx, gy, gz} = omega
+
+        Q.identity()
+        |> Math.gyro_derivative(gx, gy, gz)
+        |> Tuple.to_list()
+        |> Enum.zip(Tuple.to_list(expected))
+        |> Enum.each(fn {actual, expected} ->
+          assert_in_delta actual, expected, @tolerance
+        end)
+      end
+    end
+
+    test "stays orthogonal to the orientation, so integrating preserves unit norm" do
+      q = Q.from_euler(0.3, -0.2, 0.7, :zyx)
+      {dw, dx, dy, dz} = Math.gyro_derivative(q, 0.4, -0.9, 0.15)
+
+      assert_in_delta q.w * dw + q.x * dx + q.y * dy + q.z * dz, 0.0, @tolerance
+    end
+
+    test "returns a bare tuple, not a quaternion - a derivative is not a rotation" do
+      assert is_tuple(Math.gyro_derivative(Q.identity(), 1.0, 2.0, 3.0))
+    end
+  end
 
   describe "gravity/0" do
     test "returns standard gravity in m/s²" do
@@ -19,7 +55,7 @@ defmodule BB.Estimator.Ahrs.MathTest do
 
   describe "quaternion_to_euler/2" do
     test "identity quaternion → zero euler angles" do
-      {roll, pitch, yaw} = Math.quaternion_to_euler(%Q{})
+      {roll, pitch, yaw} = Math.quaternion_to_euler(Q.identity())
       assert_in_delta roll, 0.0, @tolerance
       assert_in_delta pitch, 0.0, @tolerance
       assert_in_delta yaw, 0.0, @tolerance
@@ -96,7 +132,7 @@ defmodule BB.Estimator.Ahrs.MathTest do
 
   describe "rotate_vector/2" do
     test "identity quaternion preserves the vector" do
-      assert {1.0, 2.0, 3.0} = Math.rotate_vector({1.0, 2.0, 3.0}, %Q{})
+      assert {1.0, 2.0, 3.0} = Math.rotate_vector({1.0, 2.0, 3.0}, Q.identity())
     end
 
     test "90° rotation around Z takes +X to +Y" do

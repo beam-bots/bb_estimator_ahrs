@@ -63,7 +63,7 @@ defmodule BB.Estimator.Ahrs.MixProject do
 
   defp deps do
     [
-      {:bb, bb_dep("~> 0.20")},
+      {:bb, bb_dep("~> 0.31")},
 
       # dev/test
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

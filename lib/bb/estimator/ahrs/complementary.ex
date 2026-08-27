@@ -49,12 +49,12 @@ defmodule BB.Estimator.Ahrs.Complementary do
     ]
 
   alias BB.Estimator.Ahrs.Math, as: AhrsMath
-  alias BB.Estimator.Ahrs.Quaternion, as: Q
+  alias BB.Math.Quaternion, as: Q
   alias BB.Math.Vec3
   alias BB.Message
   alias BB.Message.Sensor.Imu
 
-  defstruct q: %Q{},
+  defstruct q: Q.identity(),
             last_monotonic_time: nil,
             alpha: 0.98,
             time_constant: nil,
@@ -99,7 +99,7 @@ defmodule BB.Estimator.Ahrs.Complementary do
 
     {:ok, out} =
       Imu.new(message.frame_id,
-        orientation: Q.to_bb(state.q),
+        orientation: state.q,
         angular_velocity: imu.angular_velocity,
         linear_acceleration: imu.linear_acceleration
       )
@@ -145,14 +145,14 @@ defmodule BB.Estimator.Ahrs.Complementary do
   defp vec_to_tuple(%Vec3{} = v), do: {Vec3.x(v), Vec3.y(v), Vec3.z(v)}
 
   defp integrate_gyro(q, {gx, gy, gz}, dt) do
-    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = Q.gyro_derivative(q, gx, gy, gz)
+    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = AhrsMath.gyro_derivative(q, gx, gy, gz)
 
-    Q.normalise(%Q{
-      w: q.w + q_dot_w * dt,
-      x: q.x + q_dot_x * dt,
-      y: q.y + q_dot_y * dt,
-      z: q.z + q_dot_z * dt
-    })
+    Q.new(
+      q.w + q_dot_w * dt,
+      q.x + q_dot_x * dt,
+      q.y + q_dot_y * dt,
+      q.z + q_dot_z * dt
+    )
   end
 
   defp apply_correction(q_gyro, {ax, ay, az}, state, dt) do
@@ -188,11 +188,11 @@ defmodule BB.Estimator.Ahrs.Complementary do
         do: %Q{w: -q_accel.w, x: -q_accel.x, y: -q_accel.y, z: -q_accel.z},
         else: q_accel
 
-    Q.normalise(%Q{
-      w: alpha * q_gyro.w + one_minus * q_accel.w,
-      x: alpha * q_gyro.x + one_minus * q_accel.x,
-      y: alpha * q_gyro.y + one_minus * q_accel.y,
-      z: alpha * q_gyro.z + one_minus * q_accel.z
-    })
+    Q.new(
+      alpha * q_gyro.w + one_minus * q_accel.w,
+      alpha * q_gyro.x + one_minus * q_accel.x,
+      alpha * q_gyro.y + one_minus * q_accel.y,
+      alpha * q_gyro.z + one_minus * q_accel.z
+    )
   end
 end

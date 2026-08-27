@@ -16,10 +16,30 @@ defmodule BB.Estimator.Ahrs.Math do
   `Ahrs.Math`.
   """
 
-  alias BB.Estimator.Ahrs.Quaternion, as: Q
+  alias BB.Math.Quaternion, as: Q
 
   @gravity 9.80665
   @gimbal_lock_threshold 0.99999
+
+  @doc """
+  Calculates `q̇`, the time-derivative of a quaternion under angular
+  velocity `(gx, gy, gz)` in rad/s. Returns a `{ẇ, ẋ, ẏ, ż}` 4-tuple.
+
+  A derivative is not itself a rotation, so it is returned as a bare tuple
+  rather than a `BB.Math.Quaternion` - that type is always a unit quaternion and
+  would normalise the magnitude away. Callers scale it by `dt`, add it to the
+  current orientation, and normalise the result.
+  """
+  @spec gyro_derivative(Q.t(), float(), float(), float()) ::
+          {float(), float(), float(), float()}
+  def gyro_derivative(%Q{w: w, x: x, y: y, z: z}, gx, gy, gz) do
+    {
+      0.5 * (-x * gx - y * gy - z * gz),
+      0.5 * (w * gx + y * gz - z * gy),
+      0.5 * (w * gy - x * gz + z * gx),
+      0.5 * (w * gz + x * gy - y * gx)
+    }
+  end
 
   @doc "Standard gravity in m/s²."
   @spec gravity() :: float()
@@ -69,12 +89,12 @@ defmodule BB.Estimator.Ahrs.Math do
     cy = :math.cos(yaw * 0.5)
     sy = :math.sin(yaw * 0.5)
 
-    %Q{
-      w: cr * cp * cy + sr * sp * sy,
-      x: sr * cp * cy - cr * sp * sy,
-      y: cr * sp * cy + sr * cp * sy,
-      z: cr * cp * sy - sr * sp * cy
-    }
+    Q.new(
+      cr * cp * cy + sr * sp * sy,
+      sr * cp * cy - cr * sp * sy,
+      cr * sp * cy + sr * cp * sy,
+      cr * cp * sy - sr * sp * cy
+    )
   end
 
   defp format_output({r, p, y}, :radians), do: {r, p, y}

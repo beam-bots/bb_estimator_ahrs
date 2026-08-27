@@ -36,11 +36,17 @@ Each algorithm module:
 - Tracks `dt` from `message.monotonic_time` — the wall clock is never
   read.
 
-The internal `BB.Estimator.Ahrs.Quaternion` is a scalar 4-float struct, deliberately
-kept separate from `BB.Math.Quaternion` (Nx-backed) — Nx dispatch
-overhead is prohibitive at AHRS update rates of 100–1000 Hz.
-Conversion to `BB.Math.Quaternion` happens only at the message
-boundary via `BB.Estimator.Ahrs.Quaternion.to_bb/1`.
+The filters use `BB.Math.Quaternion` directly. They previously carried their own
+scalar 4-float quaternion, because `BB.Math.Quaternion` was Nx-backed and the
+dispatch overhead was prohibitive at AHRS update rates of 100–1000 Hz; that type
+now holds plain floats, so the parallel struct and its conversion boundary are
+gone.
+
+`BB.Math.Quaternion` is always a *unit* quaternion — `new/4` normalises. A gyro
+derivative is not a rotation and must not be normalised, so
+`BB.Estimator.Ahrs.Math.gyro_derivative/4` returns a bare `{ẇ, ẋ, ẏ, ż}` tuple.
+Note also that `%BB.Math.Quaternion{}` is all-`nil` rather than the identity;
+use `BB.Math.Quaternion.identity/0`.
 
 ## Build and Test Commands
 

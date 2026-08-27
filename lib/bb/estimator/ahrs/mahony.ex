@@ -47,12 +47,12 @@ defmodule BB.Estimator.Ahrs.Mahony do
     ]
 
   alias BB.Estimator.Ahrs.Math, as: AhrsMath
-  alias BB.Estimator.Ahrs.Quaternion, as: Q
+  alias BB.Math.Quaternion, as: Q
   alias BB.Math.Vec3
   alias BB.Message
   alias BB.Message.Sensor.Imu
 
-  defstruct q: %Q{},
+  defstruct q: Q.identity(),
             e_int: {0.0, 0.0, 0.0},
             last_monotonic_time: nil,
             kp: 2.0,
@@ -103,7 +103,7 @@ defmodule BB.Estimator.Ahrs.Mahony do
 
     {:ok, out} =
       Imu.new(message.frame_id,
-        orientation: Q.to_bb(state.q),
+        orientation: state.q,
         angular_velocity: imu.angular_velocity,
         linear_acceleration: imu.linear_acceleration
       )
@@ -144,15 +144,15 @@ defmodule BB.Estimator.Ahrs.Mahony do
         )
       end
 
-    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = Q.gyro_derivative(q, gx, gy, gz)
+    {q_dot_w, q_dot_x, q_dot_y, q_dot_z} = AhrsMath.gyro_derivative(q, gx, gy, gz)
 
     new_q =
-      Q.normalise(%Q{
-        w: q.w + q_dot_w * dt,
-        x: q.x + q_dot_x * dt,
-        y: q.y + q_dot_y * dt,
-        z: q.z + q_dot_z * dt
-      })
+      Q.new(
+        q.w + q_dot_w * dt,
+        q.x + q_dot_x * dt,
+        q.y + q_dot_y * dt,
+        q.z + q_dot_z * dt
+      )
 
     %{state | q: new_q, e_int: new_e_int}
   end
